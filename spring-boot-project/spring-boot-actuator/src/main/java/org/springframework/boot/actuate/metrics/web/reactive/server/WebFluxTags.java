@@ -21,6 +21,7 @@ import java.util.regex.Pattern;
 import io.micrometer.core.instrument.Tag;
 
 import org.springframework.boot.actuate.metrics.http.Outcome;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.StringUtils;
@@ -49,6 +50,8 @@ public final class WebFluxTags {
 
 	private static final Tag EXCEPTION_NONE = Tag.of("exception", "None");
 
+	private static final Tag METHOD_UNKNOWN = Tag.of("method", "UNKNOWN");
+
 	private static final Pattern TRAILING_SLASH_PATTERN = Pattern.compile("/$");
 
 	private WebFluxTags() {
@@ -63,7 +66,11 @@ public final class WebFluxTags {
 	 * @return the method tag whose value is a capitalized method (e.g. GET).
 	 */
 	public static Tag method(ServerWebExchange exchange) {
-		return Tag.of("method", exchange.getRequest().getMethodValue());
+		HttpMethod httpMethod = exchange.getRequest().getMethod();
+		if (httpMethod != null) {
+			return Tag.of("method", httpMethod.name());
+		}
+		return METHOD_UNKNOWN;
 	}
 
 	/**
